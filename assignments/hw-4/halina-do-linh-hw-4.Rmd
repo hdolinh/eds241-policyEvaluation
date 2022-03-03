@@ -66,7 +66,7 @@ sardines_log <- sardines_data %>%
 model_1 <- lm_robust(data = sardines_log, volume_sold_kg_log ~ price_euro_kg_log)
 huxreg(model_1)
 
-# test that price = -1
+# test that price = -1 ??
 #linearHypothesis(model_1, c("price_euro_kg_log=-1"), white.adjust = "hc2")
 ```
 
@@ -78,6 +78,11 @@ log(price_euro_kg). To begin, estimate the first-stage regression relating log(p
 wind_m_s. Interpret the estimated coefficient on wind speed. Does it have the expected sign?
 Also test for the relevance of the instrument and whether it is a “weak” instrument by reporting
 the proper F-statistic.
+
+```{r}
+
+```
+
 
 # Question C
 \noindent Estimate the TSLS (two stage least squared) estimator of the price elasticity of demand for sardines using wind_m_s as an instrument for log(price_euro_kg). What is the estimated price elasticity of demand for sardines?
