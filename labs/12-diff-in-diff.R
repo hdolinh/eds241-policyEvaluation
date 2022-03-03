@@ -14,10 +14,10 @@ library(tidyverse)
 # getwd()
 
 # IMPORT CSV DATA 
-RPS <- read_csv(here::here("data/RPS_data.csv"))
+RPS <- read_csv(here::here("labs/data/RPS_data.csv"))
 
 # SUMMARY STATISTICS
-stargazer(RPS, type="text", digits=2)
+stargazer(RPS, type="text", digits=2) # can't see table??
 
 # LIST SOME VARIABLES FOR CALIFORNIA
 RPS%>%
