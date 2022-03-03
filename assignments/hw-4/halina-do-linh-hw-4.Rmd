@@ -1,0 +1,91 @@
+---
+title: "EDS241: Assignment 4"
+author: "Halina Do-Linh"
+date: '`r format(Sys.time(), "%m/%d/%Y")`'
+output: 
+  pdf_document:
+    toc: false
+    number_sections: no
+header-includes:
+  - \setlength{\parindent}{1em}
+  - \usepackage{float}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+# set default chunk options
+knitr::opts_chunk$set(fig.width = 4, fig.height = 3, 
+                      echo = TRUE, message = FALSE, warning = FALSE)
+# load packages
+librarian::shelf(here,
+                 tidyr,
+                 stringr,
+                 janitor,
+                 estimatr,
+                 cowplot,
+                 ggplot2,
+                 tinytex,
+                 datasets,
+                 tibble,
+                 tidyverse,
+                 huxtable,
+                 car,
+                 readxl)
+
+# devtools::install_github('rstudio/rmarkdown')
+options(scipen=999) # not scientific notation
+```
+
+\noindent For Assignment 4, we will estimate the price elasticity of demand for fresh sardines across 56 ports located in 4 European countries with monthly data from 2013 to 2019. The data are
+contained in the file `EU_sardines.csv`.
+
+\noindent We are using the following variables: `year`, `month`, `country`, `port` (port where
+sardines are landed and sold), `price_euro_kg` (price per kg in €), and `volume_sold_kg` (quantity
+of sardines sold in kg). In the questions below, I use `log()` to denote the natural logarithm.
+
+# Load Data & Prepare dataset
+
+```{r}
+sardines_data <- read_csv(here::here("data/EU_sardines.csv")) %>% 
+  select(-"wind_m_s")
+```
+
+
+# Question A
+\noindent Estimate a bivariate regression of `log(volume_sold_kg)` on `log(price euro_kg)`. What is the price elasticity of demand for sardines? Test the null hypothesis that the price elasticity is equal to -1.
+
+```{r}
+# log of volume sold and price 
+sardines_log <- sardines_data %>% 
+  mutate(price_euro_kg_log = log(price_euro_kg),
+         volume_sold_kg_log = log(volume_sold_kg))
+
+# bivariate regression
+model_1 <- lm_robust(data = sardines_log, volume_sold_kg_log ~ price_euro_kg_log)
+huxreg(model_1)
+
+# test that price = -1
+#linearHypothesis(model_1, c("price_euro_kg_log=-1"), white.adjust = "hc2")
+```
+
+
+
+# Question B
+\noindent Like in Lecture 8 (see the IV.R script), we will use wind_m_s as an instrument for
+log(price_euro_kg). To begin, estimate the first-stage regression relating log(price_euro_kg) to
+wind_m_s. Interpret the estimated coefficient on wind speed. Does it have the expected sign?
+Also test for the relevance of the instrument and whether it is a “weak” instrument by reporting
+the proper F-statistic.
+
+# Question C
+\noindent Estimate the TSLS (two stage least squared) estimator of the price elasticity of demand for sardines using wind_m_s as an instrument for log(price_euro_kg). What is the estimated price elasticity of demand for sardines?
+
+# Question D
+\noindent Repeat the exercise in (c), but include fixed effects for each year, month, and country. [Hint: you can use the command “as.factor(country) + as.factor(year) +as.factor(month)” to the ivreg
+function in R]. Report the estimated price elasticity of demand and the F-statistic testing for
+relevant and non-weak instruments.
+
+
+

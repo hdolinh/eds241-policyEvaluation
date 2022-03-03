@@ -1,0 +1,167 @@
+---
+title: "EDS241: Assignment 2"
+author: "Halina Do-Linh"
+date: '`r format(Sys.time(), "%m/%d/%Y")`'
+output: 
+  pdf_document:
+    toc: false
+    number_sections: no
+header-includes:
+  - \setlength{\parindent}{1em}
+  - \usepackage{float}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+# set default chunk options
+knitr::opts_chunk$set(fig.width = 4, fig.height = 3, 
+                      echo = TRUE, message = FALSE, warning = FALSE)
+# load packages
+packages=c("here", 
+           "tidyr",
+           "stringr", 
+           "janitor", 
+           "patchwork", 
+           "estimatr", 
+           "cowplot", 
+           "ggplot2", 
+           "tinytex", 
+           "datasets", 
+           "tibble", 
+           "tidyverse", 
+           "huxtable", 
+           "car",
+           "readxl")
+
+for (i in packages) {
+  if (require(i,character.only=TRUE)==FALSE) {
+    install.packages(i,repos='http://cran.us.r-project.org')
+  }
+  else {
+    require(i,character.only=TRUE)
+  }
+}
+# devtools::install_github('rstudio/rmarkdown')
+options(scipen=999) # not scientific notation
+```
+
+\noindent For Assignment 2, we are providing a simple test of whether the effects of air quality regulations are the same across locations with different racial mix. We will test if the NOx Budget Program, a cap-and-trade market for nitrogen oxides (NOx) emissions from power plants lead to similar effects in counties that are predominantly white versus counties that are predominantly African American. The data we are working with comes from Olivier's paper, [Defensive Investments and the Demand for Air Quality: Evidence from the NOx Budget Program](https://olivierdeschenes.weebly.com/uploads/1/3/5/0/135068654/defensive-investments-and-the-demans-for-air-quality.pdf). 
+
+\noindent The data included in the file NBP.xls, which is available on Gauchospace, are: 
+
+- **fips**: fips code identifying each county
+- **NBP**: indicator = 1 if the county was regulated under the NOx Budget
+Program 
+- **PctBlack**: fraction of the county population that is African American
+- **Dnox_masstons**: change in annual NOx emissions from all power plants in a county between 2000 and 2008 (in tons). 
+
+\noindent Note that the NBP market was in effect in 212 of the 485 counties in the sample from 2003 to 2008, so the 2008-2000 change give us a sense of the program’s effect on emissions. If emissions of NOx from power plants declined in a county, then `dnox_masstons` should be negative.
+
+# Read in and Clean data
+
+\noindent The following code loads and cleans the data.
+
+```{r, include=TRUE}
+# load data
+nbp <- readxl::read_excel(here::here("data", "NBP.xls")) %>% clean_names()
+```
+
+# Question A
+
+\noindent The following code shows how to produce a histogram of `dnox_masstons`.
+
+```{r}
+dnox_masstons_hist <- ggplot(data = nbp, aes(x = dnox_masstons)) + 
+  geom_histogram() +
+  theme_cowplot(14) +
+  labs(x = "NOx emissions (tons)",
+       y = "")
+```
+
+\newpage
+<center>**Figure 1: Distribution of NOx emissions (tons)**</center>
+```{r , fig.width = 4, fig.height = 3, eval=TRUE, echo=FALSE}
+dnox_masstons_hist
+```
+
+\noindent Figure 1 shows the distribution of annual change in NOx emissions (tons) from all power plants in a county between 2000 and 2008.
+
+
+# Question B
+
+\noindent The following code shows how to produce the PctBlack mean for counties above the PctBlack median.
+
+```{r}
+# median of pct_black
+median_pctblack <- median(nbp$pct_black)
+
+# create indicator 'D'
+nbp_d <- nbp %>% 
+  mutate(D = case_when(pct_black > median_pctblack ~ 1,
+                       pct_black <= median_pctblack ~ 0))
+
+# mean of pct_black for counties above the median
+nbp_d_1 <- nbp_d %>% filter(D == 1)
+pct_black_mean <- mean(nbp_d_1$pct_black)
+```
+
+\noindent \textbf{Answer:} The average of PctBlack for counties above the median is `r round(pct_black_mean, digits = 2)`%.
+
+# Question C
+
+\noindent The code chunk below shows how to produce a regression of `dnox_masstons` on `nbp`.
+
+\begin{align}
+  dnox-masstons_{i} = \beta_0 + \beta_1 nbp_{1i} + u_{i}
+\end{align}
+
+\noindent Where `nbp` is a binary variable, representing if a a county has been regulated under the NOx budget or not. If `nbp` = 1, then a country was regulated under NOx budget, if `nbp` = 0, then a county was *not* regulated under NOx budget. 
+
+```{r}
+model1 <- lm_robust(formula = dnox_masstons ~ nbp, data = nbp)
+
+huxreg(model1)
+```
+
+\noindent \textbf{Answer:} The estimated intercept $\beta_{0}$ tells us the change in NOx emissions in tons between 2000 and 2008 for counties who were not regulated under the NOx budget is `r round(model1$coefficients[1], digits = 2)`.
+
+\noindent The estimated $\beta_{1}$ slope coefficient on `nbp` tells us the decrease in the change in NOx emissions in tons between 2000 and 2008 for counties who are regulated under the NOx budget is `r round(model1$coefficients[2], digits = 2)`.
+
+# Question D
+
+\noindent The code chunk below shows how to produce an interaction between `nbp` and `D`.
+
+\begin{align}
+  dnox-masstons_{i} = \beta_0 + \beta_1 nbp_{1i} + \beta_2 D_{2i} + \beta_3 nbp*D_{3i} + u_{i}
+\end{align}
+
+```{r}
+model2 <- lm_robust(formula = dnox_masstons ~ nbp + D + nbp:D, data = nbp_d)
+
+huxreg(model2)
+```
+
+\noindent \textbf{Answer:} The estimated intercept $\beta_{0}$ tells us the decrease in change in NOX emissions in tons between 2000 and 2008 for a county where a county is not regulated under NOx budget and is below the PctBlack median is `r round(model2$coefficients[1], digits = 2)`.
+
+\noindent The estimated $\beta_{1}$ coefficient on NBP is a county regulated under NOx budget and below the PctBlack median, and under those conditions we expect a `r round(model2$coefficients[2], digits = 2)` decrease in the change in NOx emissions in tons between 2000 and 2008. 
+
+\noindent The estimated $\beta_{2}$ coefficient on D is a county not regulated under the NOx budget and above the PctBlack median, and under those conditions we expect a `r round(model2$coefficients[3], digits = 2)` decrease in change in NOx emissions in tons between 2000 and 2008.
+
+\noindent The estimated $\beta_{3}$ coefficient on the interaction between NBP and D is an increase change in NOx emissions in tons between 2000 and 2008, meeting all conditions - a county that is regulated under the NOx budget and above the PctBlack median, a county that is not regulated and below the PctBlack median, a county that is regulated and below the PctBlack median, and a county not regulated and above the PctBlack median - is `r round(model2$coefficients[4], digits = 2)`
+
+# Question E
+
+\noindent The code chunk below shows how to produce the predicted `dnox_masstons` in a county that was not regulated under NBP and where Pct Black is above the sampe median.
+
+```{r}
+# predicting dnox_masstons when nbp = 0 and pct_black = 1
+pred_dnox <- data.frame(nbp = 0, D = 1)
+ci <- predict(object = model2, # interaction model from question D
+              newdata = pred_dnox, 
+              se.fit = TRUE, 
+              interval = "confidence")
+```
+
+\noindent The 95% confidence interval for the predicted `dnox_masstons` in a county that was not regulated under NBP and where `pct_black` is above the sample median is (`r round(ci$fit[2], digits = 2)`, `r round(ci$fit[3], digits = 2)`).

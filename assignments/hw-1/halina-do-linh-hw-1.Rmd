@@ -1,0 +1,172 @@
+---
+title: "EDS241: Assignment 1"
+author: "Halina Do-Linh"
+date: '`r format(Sys.time(), "%m/%d/%Y")`'
+output: 
+  pdf_document:
+    toc: false
+    number_sections: no
+header-includes:
+  - \setlength{\parindent}{1em}
+  - \usepackage{float}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+# set default chunk options
+knitr::opts_chunk$set(fig.width = 4, fig.height = 3, 
+                      echo = TRUE, message = FALSE, warning = FALSE)
+# load packages
+packages=c("here", "tidyr","stringr", "janitor", "patchwork", "estimatr", 
+           "cowplot", "ggplot2", "tinytex", "datasets", "tibble", "tidyverse", "huxtable", "car")
+
+for (i in packages) {
+  if (require(i,character.only=TRUE)==FALSE) {
+    install.packages(i,repos='http://cran.us.r-project.org')
+  }
+  else {
+    require(i,character.only=TRUE)
+  }
+}
+# devtools::install_github('rstudio/rmarkdown')
+options(scipen=999) # not scientific notation
+```
+
+\noindent For Assignment 1, we are exploring the variables
+`CensusTract`, `TotalPopulation`, `CaliforniaCounty`, `LowBirthWeight`,
+`PM25`, and `Poverty` from [CalEnviroScreen
+4.0](https://oehha.ca.gov/calenviroscreen/report/calenviroscreen-40), a
+mapping and data tool produced by the California Office of Environmental
+Health Hazards Assessment (OEHHA). The data comes from a variety of
+sources and covers all 8,035 census tracts in California.
+
+# Read in and Clean data
+
+\noindent The following code loads and cleans the data.
+
+```{r, include=TRUE}
+# load data
+ces <- read_csv(here::here("data", "ces4-final-results.csv"))
+
+# clean data
+ces_clean <- ces %>% 
+  janitor::clean_names() %>% 
+  select("census_tract",
+         "total_population", 
+         "california_county", 
+         "low_birth_weight", 
+         "pm2_5", 
+         "poverty")
+```
+
+# Question A
+
+\noindent The code chunk below shows how to produce the average
+concentration of PM2.5 across all census tracts in California.
+
+```{r, include=TRUE}
+mean_pm25_all <- mean(ces_clean$pm2_5)
+```
+
+\noindent \textbf{Answer:} The average concentration of PM2.5 across all census
+tracts in California is `r round(mean_pm25_all, digits = 2)`.
+
+\newpage
+
+# Question B
+
+\noindent The code chunk below shows how to produce the county with the
+highest level of poverty in California.
+
+```{r, include=TRUE}
+max_poverty_county <- ces_clean %>% 
+  filter(poverty != is.na(poverty)) %>%
+  group_by(california_county) %>%
+  summarize(weighted_mean_poverty = weighted.mean(poverty, total_population))
+```
+
+\noindent \textbf{Answer:} The county with the highest level of poverty in
+California is Tulare.
+
+# Question C
+
+\noindent The code chunks below show how to produce histograms of `LowBirthWeight` and `PM25`.
+
+```{r, include=TRUE}
+# histogram low birth weight
+low_birth_weight_hist <- ces_clean %>% 
+  ggplot(aes(x = low_birth_weight)) +
+  geom_histogram() +
+  theme_cowplot(14) +
+  labs(x = "% of Low Birth Weight",
+       y = "")
+```
+
+```{r, include=TRUE}
+# histogram PM2.5
+pm2_5_hist <- ces_clean %>% 
+  ggplot(aes(x = pm2_5)) +
+  geom_histogram() +
+  theme_cowplot(14) +
+  labs(x = expression(paste("PM 2.5 ", "(", mu, "g/", cm^3, ")")),
+       y = "")
+```
+
+\begin{flushleft}\textbf{Left: Distribution of Percentage of Low Birth Weight}\end{flushleft}
+
+\begin{flushright}\textbf{Right: Distribution of PM 2.5 ($\mu$g/$cm^3$)}\end{flushright}
+
+```{r, fig.width=6, fig.height=2.5, eval=TRUE, echo=FALSE}
+low_birth_weight_hist + pm2_5_hist
+```
+
+\newpage
+
+# Question D
+
+\noindent The code chunk below shows how to produce an OLS regression of `LowBirthWeight` on `PM25`.
+
+\begin{align}
+  lowbirthweight_{i} = \beta_0 + \beta_1 pm2.5_{1i} + u_{i}
+\end{align}
+
+```{r, warning=FALSE}
+model1 <- lm_robust(formula = low_birth_weight ~ pm2_5, data = ces_clean)
+
+huxreg(model1)
+```
+
+\noindent \textbf{Answer:} The estimated $\beta_{1}$ slope coefficient is `r round(model1$coefficient[2], digits = 3)` and its heteroskedasticity-robust standard error is 0.008. The estimated $\beta_{1}$ slope coefficient tells us that for every 1 $\mu$g/$cm^3$ increase in PM2.5 we expect the percentage of low birth weights to increase by 0.118. The effect of `PM25` on `LowBirthWeight` is statistically significant at a significance level of 1% and therefore at 5% as well.
+
+\newpage
+
+# Question F
+
+\noindent The code chunk below shows how to produce a multiple linear regression of `LowBirthWeight` with `PM25` and `poverty` as explanatory variables.
+
+\begin{align}
+  lowbirthweight_{i} = \beta_0 + \beta_1 pm2.5_{1i} + \beta_2 poverty_{2i} + u_{i}
+\end{align}
+
+```{r, warning=FALSE}
+model2 <- lm_robust(formula = low_birth_weight ~ pm2_5 + poverty, data = ces_clean)
+
+huxreg(model2)
+```
+
+\noindent \textbf{Answer:} The estimated $\beta_{2}$ coefficient on `poverty` tells us that for every 1% increase in poverty we expect the percentage of low birth weight to increase by `r round(model2$coefficient[3], digits = 3)`. The estimated $\beta_{1}$ coefficient on PM 2.5 went down by half compared to the estimated $\beta_{1}$ coefficient in `model1` from Question D. This is due to omitted variables bias. And in this case, `model1` from Question D was exaggerating the effect of PM 2.5 since `model2` shows that `poverty` also has a significant effect on `LowBirthWeight`.
+
+\newpage
+
+# Question G
+
+\noindent The code chunk below is using hypothesis testing to test the null hypothesis that the effect of `PM25` is equal to the effect of `poverty` based on `model2`.
+
+```{r}
+# test that pm2_5 = poverty or pm2_5 - poverty = 0
+linearHypothesis(model2, c("pm2_5=poverty"), white.adjust = "hc2")
+```
+
+\noindent \textbf{Answer:} We reject the null hypothesis that the effect of `PM25` is equal to the effect of `poverty` because the p-value is statistically significant at the 1% significance level.

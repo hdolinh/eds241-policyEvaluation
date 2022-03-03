@@ -1,0 +1,116 @@
+---
+title: "EDS241: Assignment template/example"
+author: "Vincent Thivierge"
+date: '`r format(Sys.time(), "%m/%d/%Y")`'
+output: 
+  pdf_document:
+    toc: false
+    number_sections: yes
+header-includes:
+  - \setlength{\parindent}{1em}
+  - \usepackage{float}
+--- 
+  
+``` {r setup, echo = FALSE, message = FALSE, warning = FALSE}
+
+# set default chunk options
+knitr::opts_chunk$set(fig.width = 4, fig.height = 3, 
+                      echo = TRUE, message = FALSE, warning = FALSE)
+
+
+# load packages
+packages=c("stargazer", "here", "tidyr", "dplyr","stringr", "janitor", 
+           "cowplot", "ggplot2", "tinytex", "datasets", "tibble")
+
+for (i in packages) {
+  if (require(i,character.only=TRUE)==FALSE) {
+    install.packages(i,repos='http://cran.us.r-project.org')
+  }
+  else {
+    require(i,character.only=TRUE)
+  }
+}
+
+#devtools::install_github('rstudio/rmarkdown')
+options(scipen=999) # not scientific notation
+
+
+```
+
+\noindent In this mock assignment, we use the preloaded ``mtcars" data in R to investigate the relationship between vehicle miles per gallon (MPG), weight, and number of cylinders. The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973--74 models).
+
+# Clean and plot data
+
+\noindent The following code loads and cleans the data.
+
+```{r , include=TRUE}
+
+# Load data
+
+data("mtcars")
+raw_data <- mtcars
+
+# Clean data
+
+## Add model names as a column 
+## [this is just an example manipulation, I rarely assign rownames to a column]
+
+clean_data <- tibble::rownames_to_column(raw_data, "model")
+
+
+```
+
+\noindent The code chunk below shows how to produce a scatter plot of MPG against weight.  
+
+```{r , include=TRUE}
+
+# Plot 1
+
+plot_1 <- ggplot(clean_data, aes(y=mpg, x = wt))+
+  geom_point()+
+  theme_cowplot(14)+
+  labs(x = "Weight (1000 lbs)", y = "Miles per gallon")
+
+```
+
+\newpage
+<center>**Figure 1: MPG and vehicle weight**</center>
+```{r , fig.width = 4, fig.height = 3, eval=TRUE, echo=FALSE}
+plot_1
+```
+
+\noindent Figure 1 shows the expected negative relationship between vehicle weight and MPG.
+
+# Run and interpret regression models
+
+\noindent In order to more formally analyze the relationship between MPG, vehicle weight, and cylinders we estimate the following regression: 
+
+\begin{align}
+  Y_{i} = \beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + u_{i}
+\end{align}
+
+\noindent where $Y_{i}$ is MPG for vehicle model $i$, $X_{1i}$ is the vehicle weight, $X_{2i}$ is the number of cylinders in the engine, and $u_{i}$ the regression error term. We will consider a regression including only vehicle weight, and a regression including vehicle weight and number of cylinders.
+
+\medskip
+
+\noindent In R, we run the following code: 
+
+```{r , include=TRUE}
+
+model_1 <- lm(mpg ~ wt, data=clean_data)
+model_2 <- lm(mpg ~ wt + cyl, data=clean_data)
+
+```
+
+\noindent Table 1 shows the estimated coeffients from estimating equation (1). 
+
+```{r , results = 'asis', echo = FALSE}
+stargazer(model_1, model_2, type = "latex", ci=FALSE, no.space = TRUE, 
+          header = FALSE, omit = c("Constant"), omit.stat = c("adj.rsq","ser", "f"),
+          covariate.labels = c("Weight (1000 lbs)", "Cylinders"), dep.var.labels = c("MPG"),
+          dep.var.caption = c(""),
+          title = "MPG and vehicle weight", table.placement = "H")
+
+```
+
+\noindent In model (1), the estimated $\beta_{1}$ coefficient implies that a 1000 pound increase in vehicle weight reduces miles per gallon by 5.3 miles. Adding the number of cylinders in model (2) reduces $\hat{\beta_{1}}$ from -5.3 to -3.2.

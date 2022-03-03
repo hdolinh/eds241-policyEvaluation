@@ -1,0 +1,37 @@
+---
+title: "Notes"
+author: "Halina Do-Linh"
+date: "2/17/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Notes
+
+## TA OH
+
+What is required for the mean difference to be true? so smoking is independent of smoking status
+unconditional randomization of treatment. 
+Treatment is independent of potential outcomes. 
+Hypothesis test vs assumption? 
+
+Second part of the question: What would need to be true for the difference in means to be true?
+- we have treatment ignorability 
+- randomized treatment experiment is ideal but not happening here
+
+Are smoking status correlated with these variables? Show that these are 
+show that there is OVB bc there is statistically significant correlation 
+income ~ smoking
+educ ~ smoking
+age ~ smoking
+
+find the means - the point estimate means are different - but are they statistically significant? So run a linear regression
+
+want to find that smoking is randomly assigned 
+
+pick one and find a story to say why we need randomization of smoking status 
+
+*we need smoking status to be assigned to mother's unconditionally*

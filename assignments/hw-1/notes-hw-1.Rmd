@@ -1,0 +1,83 @@
+---
+title: "Notes HW 1"
+author: "Halina Do-Linh"
+date: "1/19/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Notes
+
+For Question E from TA OH
+
+How does robust SD error vary from regular? robust does HC2 a more
+conservative measurement of standard error HC2 regression estimation
+part and the inference part is this statistically significant or not
+coefficient: 
+
+- is this beta linked positively or negative? 
+- does this make y or our prediction go up or down 
+- make inferential terms based on standard errors
+
+p value, confident intervals, and standard errors are all related
+
+standard error gives us context about p value. so be more suspicious of
+our p value if our standard errors be large?
+
+picking the sig level is what makes p value are what arbitrary
+
+standard errors as significant: reports automatically little sig stars
+which directly interprets our p values
+
+hetero robust stand errors auto adjusts our standard errors
+
+low birth are increased as pm 2.5 increases
+
+# Question from hw 1 - Question E
+
+Suppose a new air quality policy is expected to reduce PM2.5 concentration by 2
+micrograms per cubic meters. Predict the new average value of LowBirthWeight and
+derive its 95% confidence interval. Interpret the 95% confidence interval
+
+# Question E
+
+\noindent The code chunk below shows how to produce a regression with a 95% confidence interval when `PM25` is now changing by -2.
+
+need to manipulate dataframe to  create a pm2_5 policy 
+
+notes from TA OH:
+- don't want to reduce everything by 2 because then we get the same coefficent (which we did)
+- use what we already estimated and use those coefficients to make a statement about a potential policy
+- what is the predicted mean effect of reducing PM2.5 by 2 micrograms/cubic meter? ANS: we know what this looks like because it's a linear model. we know that by doubling that it would reduce more or the slope would be steeper? 
+
+minus 2 times beta coefficient 
+
+intercept is not in the confidence interval equation 
+
+What equation are we using? ANS: slide 13 on lecture 3/4
+beta truee effect = estimated y - estimated 
+
+```{r}
+# # create new df with new policy
+# ces_policy <- data_ces_clean %>% 
+#   mutate(pm2_5_policy = pm2_5 - 2)
+# 
+# # predict mean of new low birth weight
+# # y = mx + b
+# ces_policy <- ces_policy %>% 
+#   mutate(low_birth_weight_policy = (model1$coefficients[2] * pm2_5_policy) + model1$coefficients[1])
+#   
+# lbw_policy = mean(ces_policy$low_birth_weight_policy)
+# 
+# model2 <- lm_robust(formula = low_birth_weight_policy ~ pm2_5_policy, data = ces_policy)
+# huxreg(model2)
+# 
+# confint(object = model2, parm = "pm2_5_policy", level = 0.95)
+```
+
+\noindent **Answer: PM 2.5 did not change....TBD**
+
+Note: How to derive the confidence interval? 

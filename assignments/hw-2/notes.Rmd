@@ -1,0 +1,55 @@
+---
+title: "Notes"
+author: "Halina Do-Linh"
+date: "2/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## HW Notes
+
+### Question C
+If a county was  regulated then on average a 3. decrease in
+
+this is a difference in change in tons between unregulated and regulated for a county that was regulated 
+
+decrease in a change of emissions between 2008 and 2000
+
+binary explanatory variable
+
+nbp is a dummy variable 
+
+beta 0 is the expected response for a country not regulated under the NOx buget
+
+beta 0 + beta 1 is the expected response for a country regulated under the NOx budget
+
+beta 1 is the expected difference in response (beta 0 minus beta 0 + beta 1)
+
+### Question D
+beta 0 decrease in the change without the impact of the nox regulation and without the impact of the condition above or below the median
+
+this number 2.418 is on average the change for counties between 2000 and 2008 not in program and below median pct_black level
+
+the difference in average tons between countries who are regulated under the NOx budget and countries who are not regulated under the NOx budget. 
+
+beta 1 the regression coefficient on average decrease in change in nox between 2000 and 2008 in a county when they are not regulated but below the median pct_blk level while controlling for the impact 
+
+tells us the decrease in change in NOx emissions in tons between 2000 and 2008 for a county that is regulated under NOx budget and below the PctBlack median is `r round(model2$coefficients[2], digits = 2)`.
+
+beta 2 the regression coefficient in a county not regulated but above the median pct_black level and for those conditions are reporting NUMBER decrease in the change in emissions in tons between 2000 and 2008. 
+
+beta 3 the regression coefficient on average increase in change in nox emission between everything is on
+
+00 not regulated, below pct blk median
+10 being regulated, below pct blk median
+01 not regulated, pct_black above median 
+11 combination of being regulated and pct_blk above median
+combos: on average change in emissions between 2000 and 2008, meeting all conditions.
+
+## Olivier's OH
+
+hen we apply the `EPS_weighted` weights to the regression of `birthwgt` on `tobacco` we find that the estimate of smoking is fairly close to the estimate of smoking from the regression *without* the weights. This is a good sign that the effect of omitted variable bias is not biasing the regression without the weights.  
+
