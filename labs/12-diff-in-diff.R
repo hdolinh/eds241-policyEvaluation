@@ -18,14 +18,17 @@ RPS <- read_csv(here::here("labs/data/RPS_data.csv"))
 
 # SUMMARY STATISTICS
 stargazer(RPS, type="text", digits=2) # can't see table??
+summary(RPS)
 
 # LIST SOME VARIABLES FOR CALIFORNIA
+# switch from 0 to 1 in 2003 for rps_D
 RPS%>%
   filter(state_name == "California")%>%
   select(state_name, year, rps_D, rps_ever_adopter, rps_implementation_year)%>%
   View
 
 # DD REGRESSION, Y = Wind+Solar installed capacity (MW), using lm package
+# calculate robust standard errors using se_type = "HC2"
 DD_cap1 <- lm(formula = cap_WS_mw ~ rps_D + as.factor(state_name) + as.factor(year), data=RPS)
 se_DD_cap1 <- starprep(DD_cap1, stat = c("std.error"), se_type = "HC2", alpha = 0.05) 
 
