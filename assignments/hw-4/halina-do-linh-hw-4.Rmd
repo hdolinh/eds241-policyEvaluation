@@ -32,7 +32,8 @@ librarian::shelf(here,
                  tidyverse,
                  huxtable,
                  car,
-                 readxl)
+                 readxl,
+                 AER) # AER package has ivreg()
 
 # devtools::install_github('rstudio/rmarkdown')
 options(scipen=999) # not scientific notation
@@ -77,6 +78,8 @@ huxreg(model_1)
 #linearHypothesis(model_1, c("price_euro_kg_log=-1"), white.adjust = "hc2")
 ```
 
+\noindent \textbf{Answer:} Reject the null hypothesis based on the CI's because it does not overlap at -1.
+
 # Question B
 
 \noindent Like in Lecture 8 (see the IV.R script), we will use wind_m\_s
@@ -93,9 +96,16 @@ it is a "weak" instrument by reporting the proper F-statistic.
 ```{r}
 # first stage regression
 model_2 <- lm_robust(data = sardines_log, price_euro_kg_log ~ wind_m_s)
+huxreg(model_2)
 ```
 
-\noindent The estimated coefficient \beta\_1 `wind_m_s`
+```{r}
+# iv test
+tsls1 <- ivreg(price_euro_kg_log ~ wind_m_s | wind_m_s, data = sardines_log)
+summary(tsls1)
+```
+
+\noindent \textbf{Answer:} The estimated coefficient \beta\_1 on `wind_m_s` tells us that windspeed increases the price in euros by `r round(model_2$coefficients[2], 3)` and this is the right sign?
 
 # Question C
 
@@ -104,6 +114,12 @@ price elasticity of demand for sardines using wind_m\_s as an instrument
 for log(price_euro_kg). What is the estimated price elasticity of demand
 for sardines?
 
+```{r}
+tsls1 <- ivreg(price_euro_kg_log ~ wind_m_s | wind_m_s, data = sardines_log)
+summary(tsls1)
+```
+
+
 # Question D
 
 \noindent Repeat the exercise in (c), but include fixed effects for each
@@ -111,3 +127,14 @@ year, month, and country. [Hint: you can use the command
 "as.factor(country) + as.factor(year) +as.factor(month)" to the ivreg
 function in R]. Report the estimated price elasticity of demand and the
 F-statistic testing for relevant and non-weak instruments.
+
+```{r}
+tsls1_felm <- felm(price_euro_kg_log ~ wind_m_s | wind_m_s, data = sardines_log)
+summary(tsls1)
+
+# "log_tots ~ 1" is not the first stage, it is the all variables in the first stage, BUT the endogenous one
+# | 0 | means that we are not including fixed effects here.
+
+tsls1_felm <- felm(formula = log_tots ~ 1 | 0 | (log_price ~ windspd),  data=FULTON)
+```
+
