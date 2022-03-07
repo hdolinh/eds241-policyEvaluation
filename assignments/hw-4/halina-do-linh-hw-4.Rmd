@@ -50,7 +50,7 @@ the file `EU_sardines.csv`.
 sardines sold in kg). In the questions below, I use `log()` to denote
 the natural logarithm.
 
-# Load Data & Prepare dataset
+# Load Data
 
 ```{r}
 sardines_data <- read_csv(here::here("assignments/data/EU_sardines.csv"))
@@ -72,13 +72,13 @@ sardines_log <- sardines_data %>%
 # bivariate regression
 model_1 <- lm_robust(data = sardines_log, 
                      volume_sold_kg_log ~ price_euro_kg_log)
-huxreg(model_1)
-
-# test that price = -1 ??
-#linearHypothesis(model_1, c("price_euro_kg_log=-1"), white.adjust = "hc2")
+huxreg(model_1, 
+       bold_signif = 0.05,
+       ci_level = 0.95,
+       error_format = ("({conf.low} -- {conf.high})"))
 ```
 
-\noindent \textbf{Answer:} Reject the null hypothesis based on the CI's because it does not overlap at -1.
+\noindent \textbf{Answer:} We can reject the null hypothesis that price elasticity is equal to -1 because the confidence intervals for `price_euro_kg_log` are within the range `r round(model_1$conf.low[2], 3)` and `r round(model_1$conf.high[2], 3)` at a 95% significance level.
 
 # Question B
 
@@ -99,26 +99,32 @@ model_2 <- lm_robust(data = sardines_log, price_euro_kg_log ~ wind_m_s)
 huxreg(model_2)
 ```
 
+\noindent \textbf{Answer:} The estimated coefficient \beta\_1 on `wind_m_s` tells us that for each 1 $m/s$ wind speed the price of sardines in euros increases by `r round(model_2$coefficients[2], 3)`. I believe this is the expected sign because....
+
+
 ```{r}
-# iv test
-tsls1 <- ivreg(price_euro_kg_log ~ wind_m_s | wind_m_s, data = sardines_log)
-summary(tsls1)
+# instrument relevance and non--weak test 
+# want f-statistic to be greater than 10
+hypo_1 <- linearHypothesis(model_2, # first stage regression model
+                 c("wind_m_s = 0"), # null hypothesis
+                 white.adjust = "hc2") # robust heteroskedastic errors
 ```
 
-\noindent \textbf{Answer:} The estimated coefficient \beta\_1 on `wind_m_s` tells us that windspeed increases the price in euros by `r round(model_2$coefficients[2], 3)` and this is the right sign?
+\noindent \textbf{Answer:} The F-statistic is `r round(hypo_1$Chisq[2], 2)` and is greater than 10 and is therefore not a weak instrument.
 
 # Question C
 
 \noindent Estimate the TSLS (two stage least squared) estimator of the
-price elasticity of demand for sardines using wind_m\_s as an instrument
+price elasticity of demand for sardines using `wind_m_s` as an instrument
 for log(price_euro_kg). What is the estimated price elasticity of demand
 for sardines?
 
 ```{r}
-tsls1 <- ivreg(price_euro_kg_log ~ wind_m_s | wind_m_s, data = sardines_log)
-summary(tsls1)
+tsls1 <- ivreg(volume_sold_kg_log ~ price_euro_kg_log | wind_m_s, data = sardines_log)
+huxreg(tsls1)
 ```
 
+\noindent \textbf{Answer:} The estimated price elasticity of demand for sardines is `r  round(tsls1$coefficients[2], 2)`. 
 
 # Question D
 
@@ -129,12 +135,24 @@ function in R]. Report the estimated price elasticity of demand and the
 F-statistic testing for relevant and non-weak instruments.
 
 ```{r}
-tsls1_felm <- felm(price_euro_kg_log ~ wind_m_s | wind_m_s, data = sardines_log)
-summary(tsls1)
+# tsls with fixed effects
+tsls_fixed <- ivreg(volume_sold_kg_log ~ price_euro_kg_log + as.factor(country) + as.factor(year) + as.factor(month)
+                    | wind_m_s, data = sardines_log)
 
-# "log_tots ~ 1" is not the first stage, it is the all variables in the first stage, BUT the endogenous one
-# | 0 | means that we are not including fixed effects here.
-
-tsls1_felm <- felm(formula = log_tots ~ 1 | 0 | (log_price ~ windspd),  data=FULTON)
+## example from lab 11 panel-wind ## 
+# ols2 <- lm(formula = log_emp ~ capacity_gwwind + pop1000 + gdp_state_millions_usd + as.factor(year), data=QWI)
+# se_ols2 <- starprep(ols2, stat = c("std.error"), se_type = "HC2", alpha = 0.05) 
 ```
 
+
+```{r}
+# instrument relevance and non--weak test 
+# want f-statistic to be greater than 10
+hypo_2 <- linearHypothesis(tsls_fixed, 
+                 c("wind_m_s = 0"), 
+                 white.adjust = "hc2")
+
+## get an error here....which model should I use?
+```
+
+\noindent \textbf{Answer:} The estimated price elasticity of demand is `r round(tsls_fixed$coefficients[2], 2)`. And the F-staistic testing for relevant and non-weak instruments is `r `.
