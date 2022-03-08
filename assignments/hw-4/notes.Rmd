@@ -33,3 +33,40 @@ We can reject the null hypothesis that price elasticity is equal to -1 because t
 - What is the correct model? Where to put the fixed effects?
 - What is over identified model mean? I.e. from IV.R lab
 - Do we need a different model for getting the F-statistic? 
+
+
+```{r}
+# tsls with fixed effects
+tsls_fixed <- ivreg(volume_sold_kg_log ~ price_euro_kg_log + as.factor(country) + as.factor(year) + as.factor(month) | as.factor(country) + as.factor(year) + as.factor(month) + wind_m_s, data = sardines_log)
+
+# need to have the same covariates in the same 
+# second stage | first stage
+# left out is the instrument and the endogenous 
+```
+
+```{r}
+# instrument relevance and non--weak test 
+# want f-statistic to be greater than 10
+# need to use the regression from the first stage with the fixed effects
+model_fixed <- lm_robust(data = sardines_log, price_euro_kg_log ~ wind_m_s + as.factor(country) + as.factor(year) + as.factor(month))
+
+hypo_fixed <- linearHypothesis(model_fixed, 
+                 c("wind_m_s=0"), 
+                 white.adjust = "hc2")
+
+## get an error here....which model should I use?
+# test for strong and weak instrument only happens in the first stage regression, not in the second stage
+```
+
+\begin{align}
+  $price_euro_kg_log_{i} = \beta_0 + \beta_1 wind_m_s_{1i} + u_{i}$
+\end{align}
+
+```{r}
+# instrument relevance and non--weak test 
+# want f-statistic to be greater than 10
+# need to use the regression from the first stage with the fixed effects
+model_fixed <- lm_robust(data = sardines_log, price_euro_kg_log ~ wind_m_s + as.factor(country) + as.factor(year) + as.factor(month))
+
+hypo_fixed <- linearHypothesis(model_fixed, c("wind_m_s=0"), white.adjust = "hc2")
+```

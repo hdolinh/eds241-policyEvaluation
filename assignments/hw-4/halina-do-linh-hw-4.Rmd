@@ -58,12 +58,6 @@ sardines_data <- read_csv(here::here("assignments/data/EU_sardines.csv"))
 
 # Question A
 
-\noindent Estimate a bivariate regression of `log(volume_sold_kg)` on
-`log(price euro_kg)`. What is the price elasticity of demand for
-sardines? Test the null hypothesis that the price elasticity is equal to
--1.
-
-
 ```{r}
 # log of volume sold and price 
 sardines_log <- sardines_data %>% 
@@ -79,21 +73,11 @@ huxreg(model_1)
 linearHypothesis(model_1, c("price_euro_kg_log = -1"), white.adjust = "hc2")
 ```
 
-\noindent \textbf{Answer:} The price elasticity of demand for sardines `r round(model_1$coefficients[2], 2)`. And we reject the null hypothesis that price elasticity is equal to -1 because the p-value is significant at the 1% significance level. 
+\noindent \textbf{Answer:} The price elasticity of demand for sardines `r round(model_1$coefficients[2], 2)`. And we reject the null hypothesis that price elasticity is equal to -1 because the p-value is statistically significant. 
 
+\newpage
 
 # Question B
-
-\noindent Like in Lecture 8 (see the IV.R script), we will use wind_m\_s
-as an instrument for log(price_euro_kg). To begin, estimate the
-first-stage regression relating log(price_euro_kg) to `wind_m_s`.
-Interpret the estimated coefficient on wind speed. Does it have the
-expected sign? Also test for the relevance of the instrument and whether
-it is a "weak" instrument by reporting the proper F-statistic.
-
-\begin{align}
-  price_euro_kg_log_{i} = \beta_0 + \beta_1 wind_m_s_{1i} + u_{i}
-\end{align}
 
 ```{r}
 # first stage regression
@@ -101,8 +85,9 @@ model_2 <- lm_robust(data = sardines_log, price_euro_kg_log ~ wind_m_s)
 huxreg(model_2)
 ```
 
-\noindent \textbf{Answer:} The estimated coefficient \beta\_1 on `wind_m_s` tells us that for each 1 $m/s$ of wind speed the price of sardines in euros increases by `r round(model_2$coefficients[2], 3)`. This is the expected sign because fishing conditions are worse when it is windy, meaning supply will likely go down causing prices to increase.
+\noindent \textbf{Answer:} The estimated coefficient $\beta\_1$ on `wind_m_s` tells us that for each 1 $m/s$ of wind speed the price of sardines in euros increases by `r round(model_2$coefficients[2], 3)`. This is the expected sign because fishing conditions are worse when it is windy, meaning supply will likely go down causing prices to increase.
 
+\newpage
 
 ```{r}
 # instrument relevance and non--weak test 
@@ -116,11 +101,6 @@ hypo_1 <- linearHypothesis(model_2, # first stage regression model
 
 # Question C
 
-\noindent Estimate the TSLS (two stage least squared) estimator of the
-price elasticity of demand for sardines using `wind_m_s` as an instrument
-for log(price_euro_kg). What is the estimated price elasticity of demand
-for sardines?
-
 ```{r}
 tsls1 <- ivreg(volume_sold_kg_log ~ price_euro_kg_log | wind_m_s, data = sardines_log)
 huxreg(tsls1)
@@ -130,26 +110,22 @@ huxreg(tsls1)
 
 # Question D
 
-\noindent Repeat the exercise in (c), but include fixed effects for each
-year, month, and country. [Hint: you can use the command
-"as.factor(country) + as.factor(year) +as.factor(month)" to the ivreg
-function in R]. Report the estimated price elasticity of demand and the
-F-statistic testing for relevant and non-weak instruments.
-
 ```{r}
 # tsls with fixed effects
-# second stage | first stage
-tsls_fixed <- ivreg(volume_sold_kg_log ~ price_euro_kg_log + as.factor(country) + as.factor(year) + as.factor(month) | wind_m_s + as.factor(country) + as.factor(year) + as.factor(month), data = sardines_log)
+tsls_fixed <- ivreg(volume_sold_kg_log ~ price_euro_kg_log + 
+                      as.factor(country) + as.factor(year) + as.factor(month) | 
+                      wind_m_s + 
+                      as.factor(country) + as.factor(year) + as.factor(month), 
+                    data = sardines_log)
 ```
 
 
 ```{r}
-# instrument relevance and non--weak test 
-# want f-statistic to be greater than 10
 # need to use the regression from the first stage with the fixed effects
-model_fixed <- lm_robust(data = sardines_log, price_euro_kg_log ~ wind_m_s + as.factor(country) + as.factor(year) + as.factor(month))
+model_fixed <- lm_robust(data = sardines_log, price_euro_kg_log ~ wind_m_s +
+                           as.factor(country) + as.factor(year) + as.factor(month))
 
 hypo_fixed <- linearHypothesis(model_fixed, c("wind_m_s=0"), white.adjust = "hc2")
 ```
 
-\noindent \textbf{Answer:} The estimated price elasticity of demand is `r round(tsls_fixed$coefficients[2], 2)`. And the F-statistic testing for relevant and non-weak instruments is `r round(hypo_fixed$Chisq[2], 2)`.
+\noindent \textbf{Answer:} The estimated price elasticity of demand is `r round(tsls_fixed$coefficients[2], 2)`. And the F-statistic testing for wind as a relevant and non-weak instrument is `r round(hypo_fixed$Chisq[2], 2)`.
