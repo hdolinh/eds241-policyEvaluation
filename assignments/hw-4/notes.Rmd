@@ -1,0 +1,35 @@
+---
+title: "Notes"
+author: "Halina Do-Linh"
+date: "3/8/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Notes
+
+
+## Question A
+- Best way to test null hypo? Is CI's enough? 
+- double check model
+
+```{r}
+# huxreg(model_1, 
+#        bold_signif = 0.05,
+#        ci_level = 0.95,
+#        error_format = ("({conf.low} -- {conf.high})"))
+```
+
+
+We can reject the null hypothesis that price elasticity is equal to -1 because the confidence intervals for `price_euro_kg_log` are within the range `r round(model_1$conf.low[2], 3)` and `r round(model_1$conf.high[2], 3)` at a 95% significance level.
+
+## Questions
+- How to know what is the expected sign? You catch less when it's bad conditions aka windy so we expect the sign to be positive therefore more expensive price for sardines when wind increases
+
+## Question
+- What is the correct model? Where to put the fixed effects?
+- What is over identified model mean? I.e. from IV.R lab
+- Do we need a different model for getting the F-statistic? 
