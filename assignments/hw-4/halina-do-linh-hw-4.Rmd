@@ -63,6 +63,10 @@ sardines_data <- read_csv(here::here("assignments/data/EU_sardines.csv"))
 sardines? Test the null hypothesis that the price elasticity is equal to
 -1.
 
+## Questions
+- Best way to test null hypo? Is CI's enough? 
+- double check model
+
 ```{r}
 # log of volume sold and price 
 sardines_log <- sardines_data %>% 
@@ -92,6 +96,9 @@ it is a "weak" instrument by reporting the proper F-statistic.
 \begin{align}
   price_euro_kg_log_{i} = \beta_0 + \beta_1 wind_m_s_{1i} + u_{i}
 \end{align}
+
+## Questions
+- How to know what is the expected sign? You catch less when it's bad conditions aka windy so we expect the sign to be positive therefore more expensive price for sardines when wind increases
 
 ```{r}
 # first stage regression
@@ -134,14 +141,15 @@ year, month, and country. [Hint: you can use the command
 function in R]. Report the estimated price elasticity of demand and the
 F-statistic testing for relevant and non-weak instruments.
 
+## Question
+- What is the correct model? Where to put the fixed effects?
+- What is over identified model mean? I.e. from IV.R lab
+- Do we need a different model for getting the F-statistic? 
+
 ```{r}
 # tsls with fixed effects
 tsls_fixed <- ivreg(volume_sold_kg_log ~ price_euro_kg_log + as.factor(country) + as.factor(year) + as.factor(month)
-                    | wind_m_s, data = sardines_log)
-
-## example from lab 11 panel-wind ## 
-# ols2 <- lm(formula = log_emp ~ capacity_gwwind + pop1000 + gdp_state_millions_usd + as.factor(year), data=QWI)
-# se_ols2 <- starprep(ols2, stat = c("std.error"), se_type = "HC2", alpha = 0.05) 
+                    | as.factor(country) + as.factor(year) + as.factor(month) + wind_m_s, data = sardines_log)
 ```
 
 
@@ -149,7 +157,7 @@ tsls_fixed <- ivreg(volume_sold_kg_log ~ price_euro_kg_log + as.factor(country) 
 # instrument relevance and non--weak test 
 # want f-statistic to be greater than 10
 hypo_2 <- linearHypothesis(tsls_fixed, 
-                 c("wind_m_s = 0"), 
+                 c("wind_m_s=0"), 
                  white.adjust = "hc2")
 
 ## get an error here....which model should I use?
