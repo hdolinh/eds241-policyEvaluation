@@ -76,12 +76,34 @@ huxreg(model_1)
 \noindent Using the data for 1978, provide some evidence the location choice of the incinerator was not “random”, but rather selected on the basis of house values and characteristics. [Hint: in the 1978 sample, are house values and characteristics balanced by `nearinc` status?]
 
 ```{r}
+# year 1978 1981
 
+# mean of 1978 house values 
+incinerator_1978 <- incinerator_data %>%
+  filter(year == 1978) %>%
+  group_by(nearinc) %>%
+  summarize(mean_rprice = mean(rprice),
+            mean_age = mean(age),
+            mean_land = mean(land),
+            mean_area = mean(area),
+            mean_room = mean(rooms))
+
+# mean difference of housing characteristics based on `nearinc`
+mean_diff_rprice
+mean_diff_age
+mean_diff_land
+mean_diff_area
+mean_diff_room
 ```
 
 
 # Question C
 \noindent Based on the observed differences in (b), explain why the estimate in (a) is likely to be biased downward (i.e., overstate the negative effect of the incinerator on housing values).
+
+```{r}
+
+```
+
 
 # Question D
 \noindent Use a difference-in-differences (DD) estimator to estimate the causal effect of the incinerator on housing values without controlling for house and lot characteristics. Interpret the magnitude and sign of the estimated DD coefficient.
