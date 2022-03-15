@@ -63,12 +63,22 @@ incinerator_data <- read_csv(here::here("assignments/data/KM_EDS241.csv"))
 \noindent Using the data for 1981, estimate a simple OLS regression of real house values on the indicator for being located near the incinerator in 1981. What is the house value “penalty” for houses located near the incinerator? Does this estimated coefficient correspond to the ‘causal’ effect of the incinerator (and the negative amenities that come with it) on housing values? Explain why or why not.
 
 ```{r}
+# simple OLS regression
+model_1 <- lm_robust(data = incinerator_data, 
+                     formula = rprice ~ nearinc)
+
+huxreg(model_1)
+```
+
+\noindent \textbf{Answer:} The house value "penalty" for houses located near the incinerator is BLANK. The estimated coefficient `r round(model_1$coefficients[2], 2)`, does correspond to the "casual" effect of the incinerator because...
+
+# Question B
+\noindent Using the data for 1978, provide some evidence the location choice of the incinerator was not “random”, but rather selected on the basis of house values and characteristics. [Hint: in the 1978 sample, are house values and characteristics balanced by `nearinc` status?]
+
+```{r}
 
 ```
 
-
-# Question B
-\noindent Using the data for 1978, provide some evidence the location choice of the incinerator was not “random”, but rather selected on the basis of house values and characteristics. [Hint: in the 1978 sample, are house values and characteristics balanced by nearinc status?]
 
 # Question C
 \noindent Based on the observed differences in (b), explain why the estimate in (a) is likely to be biased downward (i.e., overstate the negative effect of the incinerator on housing values).
