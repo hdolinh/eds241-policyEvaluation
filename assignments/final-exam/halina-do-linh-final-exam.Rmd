@@ -21,7 +21,6 @@ knitr::opts_chunk$set(fig.width = 4, fig.height = 3,
 # load packages
 librarian::shelf(here,
                  tidyr,
-                 stringr,
                  janitor,
                  estimatr,
                  cowplot,
@@ -33,7 +32,8 @@ librarian::shelf(here,
                  huxtable,
                  car,
                  readxl,
-                 AER) # AER package has ivreg()
+                 AER, # AER package has ivreg()
+                 plm) # diff in diff   
 
 # devtools::install_github('rstudio/rmarkdown')
 options(scipen=999) # not scientific notation
@@ -104,8 +104,22 @@ mean_diff_room = incinerator_1978$mean_room[1] - incinerator_1978$mean_room[2]
 # Question D
 \noindent Use a difference-in-differences (DD) estimator to estimate the causal effect of the incinerator on housing values without controlling for house and lot characteristics. Interpret the magnitude and sign of the estimated DD coefficient.
 
+```{r}
+DD_inc <- plm(data = incinerator_data,
+              rprice ~ nearinc,
+              index = c("state_name", "year"),
+              model = "within",
+              effect = "twoways")
+```
+
+
 # Question E
 \noindent Report the 95% confidence interval for the estimate of the causal effect on the incinerator in (d).
+
+```{r}
+
+```
+
 
 # Question F
 \noindent How does your answer in (d) changes when you control for house and lot characteristics? Test the hypothesis that the coefficients on the house and lot characteristics are all jointly equal to 0.
