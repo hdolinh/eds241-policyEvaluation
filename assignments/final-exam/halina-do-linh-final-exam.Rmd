@@ -65,7 +65,7 @@ incinerator_data <- read_csv(here::here("assignments/data/KM_EDS241.csv"))
 ```{r}
 # simple OLS regression
 model_1 <- lm_robust(data = incinerator_data, 
-                     formula = rprice ~ nearinc)
+                     formula = rprice ~ as.factor(nearinc))
 
 huxreg(model_1)
 ```
@@ -99,17 +99,27 @@ mean_diff_room = incinerator_1978$mean_room[1] - incinerator_1978$mean_room[2]
 # Question C
 \noindent Based on the observed differences in (b), explain why the estimate in (a) is likely to be biased downward (i.e., overstate the negative effect of the incinerator on housing values).
 
-\noindent \textbf{Answer:} Because...houses that are near incinerators are of lower value to begin with? The housing characteristics of houses near incinerators are of less value to compared to houses that are further away from incinerators. So it makes sense that there would a be a negative effect of the incinerator on houing values (so not cheaper, but less valueable). 
+\noindent \textbf{Answer:} Because...houses that are near incinerators are of lower value to begin with? The housing characteristics of houses near incinerators are of less value to compared to houses that are further away from incinerators. So it makes sense that there would a be a negative effect of the incinerator on housing values (so not cheaper, but less valueable). 
 
 # Question D
 \noindent Use a difference-in-differences (DD) estimator to estimate the causal effect of the incinerator on housing values without controlling for house and lot characteristics. Interpret the magnitude and sign of the estimated DD coefficient.
 
+rprice = beta0 + beta1 treatment group & time + treatment group + post treatment period (1981) + errors
+
 ```{r}
-DD_inc <- plm(data = incinerator_data,
-              rprice ~ nearinc,
-              index = c("state_name", "year"),
-              model = "within",
-              effect = "twoways")
+DD_cap1 <- lm(formula = cap_WS_mw ~ rps_D + as.factor(state_name) + as.factor(year), data=RPS)
+se_DD_cap1 <- starprep(DD_cap1, stat = c("std.error"), se_type = "HC2", alpha = 0.05) 
+
+DD_inc1 <- lm(data = incinerator_data,
+              formula = rprice ~ as.factor(nearinc) + )
+
+DD_cap2 <- lm(formula = cap_WS_mw ~ rps_D + as.factor(state_name) + as.factor(year), data=RPS)
+se_DD_cap2 <- starprep(DD_cap2, stat = c("std.error"), se_type = "CR2", clusters=RPS$state_name, alpha = 0.05) 
+
+DD_inc2 <- 
+
+se_models <- list(se_DD_cap1[[1]], se_DD_cap2[[1]])
+stargazer(DD_cap1, DD_cap2, se = se_models, keep=c("rps_D"), type="text")
 ```
 
 
