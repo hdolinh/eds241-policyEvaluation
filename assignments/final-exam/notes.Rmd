@@ -1,0 +1,22 @@
+---
+title: "Notes"
+author: "Halina Do-Linh"
+date: "3/16/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question C
+The housing characteristics of houses near incinerators are of less value to compared to houses that are further away from incinerators. So it makes sense that there would a be a negative effect of the incinerator on housing values (so not cheaper, but less valuable). Bc of this there is an overestimated negative effect. 
+
+# Question H
+parallel trend assumption...lecture 12. If we are using parallel trend assumption, all the houese would be appreciating at the same rate, but hte incinerator decreases the housing price for houses near an incinerator. 
+
+Because we are using our counterfactual (no incinerator) as our treatment (presence of incineraro)
+
+homes not near an incinerator provide a counter facutal for the evolution for
+
+Key assumption of the DD estimator: The control group provides a valid counterfactual for the temporal evolution of the mean outcomes in the treatment group in absence of a change in treatment. Parallel trend assumption
