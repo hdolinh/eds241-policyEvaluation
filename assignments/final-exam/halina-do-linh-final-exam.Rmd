@@ -148,7 +148,7 @@ mod4_ht <- huxreg(model_4)
 restack_across(mod4_ht, 7)
 ```
 
-\noindent \textbf{Answer:} The real housing values on average between 1978 and 1981 increased by `r `round(model_2$coefficients[3], 2)`, holding everything else constant. 
+\noindent \textbf{Answer:} The real housing values on average between 1978 and 1981 increased by `r round(model_4$coefficients[3], 2)`, holding everything else constant. 
 
 # Qustion H
 
